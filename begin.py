@@ -7,4 +7,4 @@
 
 from scrapy import cmdline
 
-cmdline.execute('scrapy crawl biquge'.split())
+cmdline.execute('scrapy crawl biquge -s LOG_FILE=log/biquge.log'.split())
