@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os
+
 import scrapy
 
 from novel.items import NovelItem
@@ -39,10 +41,11 @@ class BiqugeSpider(scrapy.Spider):
         next = 'https://www.biquge.com.cn' + response.css('.bottem1 a:nth-child(3)::attr(href)').extract_first()
 
         path = 'data/不灭龙帝/' + title + '.txt'
-        with open(path, 'x') as f:
-            for text in content:
-                text.replace('\xa0\xa0\xa0\xa0', '')
-                f.write(text)
-                f.write('\n')
-        if next.endswith('.html'):
-            yield scrapy.Request(url=next, callback=self.parse_detail)
+        if not os.path.exists(path):
+            with open(path, 'x') as f:
+                for text in content:
+                    text.replace('\xa0\xa0\xa0\xa0', '')
+                    f.write(text)
+                    f.write('\n')
+            if next.endswith('.html'):
+                yield scrapy.Request(url=next, callback=self.parse_detail)
