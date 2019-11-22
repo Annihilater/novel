@@ -36,7 +36,7 @@ class BiqugeSpider(scrapy.Spider):
 
     def parse_detail(self, response):
         title = response.css('.bookname h1::text').extract_first().strip()
-        print(title)
+        self.logger.debug('章节名称: ' + title)
         content = response.css('#content::text').extract()
         next = 'https://www.biquge.com.cn' + response.css('.bottem1 a:nth-child(3)::attr(href)').extract_first()
 
@@ -47,5 +47,6 @@ class BiqugeSpider(scrapy.Spider):
                     text.replace('\xa0\xa0\xa0\xa0', '')
                     f.write(text)
                     f.write('\n')
-            if next.endswith('.html'):
-                yield scrapy.Request(url=next, callback=self.parse_detail)
+
+        if next.endswith('.html'):
+            yield scrapy.Request(url=next, callback=self.parse_detail)
