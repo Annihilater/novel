@@ -10,7 +10,8 @@ class BiqugeSpider(scrapy.Spider):
     name = 'biquge'
     allowed_domains = ['www.biquge.com.cn']
     # start_urls = ['https://www.biquge.com.cn/']
-    start_urls = ['https://www.biquge.com.cn/book/20672/']
+    start_urls = ['https://www.biquge.com.cn/book/28694/',
+                  'https://www.biquge.com.cn/book/20672/']
 
     def parse(self, response):
         base_url = 'https://www.biquge.com.cn'
@@ -36,18 +37,21 @@ class BiqugeSpider(scrapy.Spider):
 
     def parse_detail(self, response):
         # self.logger.debug('UserAgent:' + str(response.request.headers['User-Agent'])) # 输出 UA，检查是否随机
+        name = response.css('.con_top a:nth-child(4)::text').extract_first().strip()
         title = response.css('.bookname h1::text').extract_first().strip()
         self.logger.debug('章节名称: ' + title)
         content = response.css('#content::text').extract()
         next = 'https://www.biquge.com.cn' + response.css('.bottem1 a:nth-child(3)::attr(href)').extract_first()
+        dir = 'data/' + name + '/'
+        path = dir + title + '.txt'
+        if not os.path.exists(dir):
+            os.mkdir(dir)
 
-        path = 'data/不灭龙帝/' + title + '.txt'
         if not os.path.exists(path):
             with open(path, 'x') as f:
                 for text in content:
-                    text.replace('\xa0\xa0\xa0\xa0', '')
-                    f.write(text)
-                    f.write('\n')
+                    text.replace('\xa0\xa0\xa0\xa0', '')  # 除去特殊字符
+                    f.write(text + '\n')
 
         if next.endswith('.html'):
             yield scrapy.Request(url=next, callback=self.parse_detail)
