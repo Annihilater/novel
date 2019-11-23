@@ -4,7 +4,7 @@
 #
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-
+from fake_useragent import UserAgent
 from scrapy import signals
 
 
@@ -97,6 +97,29 @@ class NovelDownloaderMiddleware(object):
         # - return None: continue processing this exception
         # - return a Response object: stops process_exception() chain
         # - return a Request object: stops process_exception() chain
+        pass
+
+    def spider_opened(self, spider):
+        spider.logger.info('Spider opened: %s' % spider.name)
+
+
+class UserAgentDownloaderMiddleware(object):
+    def __init__(self, crawler):
+        self.agent = UserAgent()
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        s = cls(crawler)
+        crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
+        return s
+
+    def process_request(self, request, spider):
+        request.headers.setdefault('User-Agent', self.agent.random)
+
+    def process_response(self, request, response, spider):
+        return response
+
+    def process_exception(self, request, exception, spider):
         pass
 
     def spider_opened(self, spider):

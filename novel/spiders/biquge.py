@@ -35,6 +35,7 @@ class BiqugeSpider(scrapy.Spider):
         yield scrapy.Request(url=url, callback=self.parse_detail)
 
     def parse_detail(self, response):
+        # self.logger.debug('UserAgent:' + str(response.request.headers['User-Agent'])) # 输出 UA，检查是否随机
         title = response.css('.bookname h1::text').extract_first().strip()
         self.logger.debug('章节名称: ' + title)
         content = response.css('#content::text').extract()
