@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import re
 
 import scrapy
 
@@ -10,11 +11,20 @@ class BiqugeSpider(scrapy.Spider):
     name = 'biquge'
     allowed_domains = ['www.biquge.com.cn']
     # start_urls = ['https://www.biquge.com.cn/']
-    start_urls = ['https://www.biquge.com.cn/book/28694/',
-                  'https://www.biquge.com.cn/book/20672/']
+    start_urls = ['https://www.biquge.com.cn/']
 
     def parse(self, response):
+        urls = response.css('a::attr(href)').extract()
+        for url in urls:
+            if re.match('^https://www.biquge.com.cn/book/(\d*)/$', url):  # 匹配小说网址
+                yield scrapy.Request(url, callback=self.parse_book)
+            if re.match('^/\w{1,}/$', url):  # 匹配专栏网址
+                _url = 'https://www.biquge.com.cn/' + url
+                yield scrapy.Request(_url, callback=self.parse)
+
+    def parse_book(self, response):
         base_url = 'https://www.biquge.com.cn'
+        url = response.url
         name = response.css('#info h1::text').extract_first()
         author = response.css('#info p::text').re_first('作\xa0\xa0\xa0\xa0者：(.*)')
         status = response.css('#info p:nth-child(3)::text').re_first('状\xa0\xa0\xa0\xa0态：(.*)').replace(',', '')
