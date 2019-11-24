@@ -39,11 +39,14 @@ class BiqugeSpider(scrapy.Spider):
                 self.logger.debug('Field is not Defined' + field)
         yield item
 
-        url = base_url + response.css('#list dl dd:nth-child(2) a::attr(href)').extract_first()  # 第一章的 url
-        # chapters = response.css('#list > dl > dd')
-        # for chapter in chapters:
-        #     url = base_url + chapter.css('a::attr(href)').extract_first()
-        yield scrapy.Request(url=url, callback=self.parse_detail)
+        dir = 'data/' + name + '/'
+        chapters = response.css('#list > dl > dd')
+        for chapter in chapters:
+            url = base_url + chapter.css('a::attr(href)').extract_first()
+            title = chapter.css('a::text').extract_first().strip()
+            path = dir + title + '.txt'
+            if not os.path.exists(path):  # 下载未下载的章节
+                yield scrapy.Request(url, callback=self.parse_detail)
 
     def parse_detail(self, response):
         # self.logger.debug('UserAgent:' + str(response.request.headers['User-Agent'])) # 输出 UA，检查是否随机
