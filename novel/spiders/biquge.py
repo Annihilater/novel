@@ -12,6 +12,7 @@ class BiqugeSpider(scrapy.Spider):
     allowed_domains = ['www.biquge.com.cn']
     # start_urls = ['https://www.biquge.com.cn/']
     start_urls = ['https://www.biquge.com.cn/']
+    boards = set()  # 存放已爬取的专栏网址
 
     def parse(self, response):
         urls = response.css('a::attr(href)').extract()
@@ -20,7 +21,9 @@ class BiqugeSpider(scrapy.Spider):
                 yield scrapy.Request(url, callback=self.parse_book)
             if re.match('^/\w{1,}/$', url):  # 匹配专栏网址
                 _url = 'https://www.biquge.com.cn/' + url
-                yield scrapy.Request(_url, callback=self.parse)
+                if _url not in self.boards:  # 针对不在集合中的专栏网址进行爬取
+                    self.boards.add(_url)
+                    yield scrapy.Request(_url, callback=self.parse)
 
     def parse_book(self, response):
         base_url = 'https://www.biquge.com.cn'
