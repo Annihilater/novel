@@ -18,7 +18,6 @@ class NovelItem(scrapy.Item):
     status = Field()
     update_time = Field()
     last_chapter = Field()
-    chapters = Field()
 
 
 class ChapterItem(scrapy.Item):
