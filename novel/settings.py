@@ -21,7 +21,7 @@ NEWSPIDER_MODULE = 'novel.spiders'
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-# CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 5
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -100,4 +100,13 @@ LOG_ENABLE = True
 LOG_ENCODING = 'UTF-8'
 LOG_FILE = 'log/biquge.log'
 LOG_LEVEL = 'DEBUG'
-LOG_STDOUT = True
+LOG_STDOUT = False
+
+# 禁止重试
+RETRY_ENABLED = False
+
+# 设定下载超时时间
+DOWNLOAD_TIMEOUT = 15
+
+# 禁止重定向
+REDIRECT_ENABLED = False
