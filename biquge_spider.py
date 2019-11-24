@@ -3,7 +3,7 @@
 # @Date  : 2019/11/22 19:48
 # @Author: yanmiexingkong
 # @email : yanmiexingkong@gmail.com
-# @File  : begin.py
+# @File  : biquge_spider.py
 
 from scrapy import cmdline
 
