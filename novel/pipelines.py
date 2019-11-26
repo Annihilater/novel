@@ -40,15 +40,9 @@ class MongoPipeline(object):
         if isinstance(item, NovelItem):
             if not self.db[name].find_one({'name': item['name'], 'author': item['author']}):
                 self.db[name].insert(dict(item))
-                print('NovelItem 保存成功')
-            else:
-                print('NovelItem 已保存')
         if isinstance(item, ChapterItem):
-            if not self.db[name].find_one({'name': item['name'], 'author': item['title']}):
+            if not self.db[name].find_one({'name': item['name'], 'title': item['title']}):
                 self.db[name].insert(dict(item))
-                print('ChapterItem 保存成功')
-            else:
-                print('ChapterItem 已保存')
         return item
 
     def close_spider(self, spider):
