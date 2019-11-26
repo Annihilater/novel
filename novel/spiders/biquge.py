@@ -1,18 +1,26 @@
 # -*- coding: utf-8 -*-
-import os
 import re
 
+import pymongo
 import scrapy
 
-from novel.items import NovelItem
+from novel.items import ChapterItem, NovelItem
+from novel.settings import MONGO_URI
 
 
 class BiqugeSpider(scrapy.Spider):
     name = 'biquge'
     allowed_domains = ['www.biquge.com.cn']
-    # start_urls = ['https://www.biquge.com.cn/']
     start_urls = ['https://www.biquge.com.cn/']
     boards = set()  # 存放已爬取的专栏网址
+
+    def exists(self, name, title):
+        client = pymongo.MongoClient(MONGO_URI)
+        # collection = client[MONGO_DB]['ChapterItem']  # crawlab 配置
+        col = client['novel']['ChapterItem']
+        result = True if col.find_one({'name': name, 'title': title}) else False
+        client.close()
+        return result
 
     def parse(self, response):
         urls = response.css('a::attr(href)').extract()
@@ -26,7 +34,12 @@ class BiqugeSpider(scrapy.Spider):
                     yield scrapy.Request(_url, callback=self.parse)
 
     def parse_book(self, response):
-        base_url = 'https://www.biquge.com.cn'
+        """
+        1. 提取小说简介信息返回 NovelItem
+        2。 爬取未爬取的章节
+        :param response:
+        :return:
+        """
         url = response.url
         name = response.css('#info h1::text').extract_first()
         author = response.css('#info p::text').re_first('作\xa0\xa0\xa0\xa0者：(.*)')
@@ -42,32 +55,62 @@ class BiqugeSpider(scrapy.Spider):
                 self.logger.debug('Field is not Defined' + field)
         yield item
 
-        dir = 'data/' + name + '/'
+        base_url = 'https://www.biquge.com.cn'
         chapters = response.css('#list > dl > dd')
         for chapter in chapters:
             url = base_url + chapter.css('a::attr(href)').extract_first()
             title = chapter.css('a::text').extract_first().strip()
-            path = dir + title + '.txt'
-            if not os.path.exists(path):  # 下载未下载的章节
+            if not self.exists(name, title):
                 yield scrapy.Request(url, callback=self.parse_detail)
+            else:
+                self.logger.debug(f'已存在不保存  《{name}》  {title}')
+
+        # 将未下载的小说章节存进 data 文件夹
+        # dir = 'data/' + name + '/'
+        # chapters = response.css('#list > dl > dd')
+        # for chapter in chapters:
+        #     url = base_url + chapter.css('a::attr(href)').extract_first()
+        #     title = chapter.css('a::text').extract_first().strip()
+        #     path = dir + title + '.txt'
+        #     if not os.path.exists(path):  # 下载未下载的章节
+        #         yield scrapy.Request(url, callback=self.parse_detail)
 
     def parse_detail(self, response):
+        """
+        提取章节信息，返回 ChapterItem
+        :param response:
+        :return:
+        """
         # self.logger.debug('UserAgent:' + str(response.request.headers['User-Agent'])) # 输出 UA，检查是否随机
         name = response.css('.con_top a:nth-child(4)::text').extract_first().strip()
         title = response.css('.bookname h1::text').extract_first().strip()
-        self.logger.debug('章节名称: ' + title)
-        content = response.css('#content::text').extract()
-        next = 'https://www.biquge.com.cn' + response.css('.bottem1 a:nth-child(3)::attr(href)').extract_first()
-        dir = 'data/' + name + '/'
-        path = dir + title + '.txt'
-        if not os.path.exists(dir):
-            os.mkdir(dir)
+        _content = response.css('#content::text').extract()
+        content = ''
+        for line in _content:
+            content = content + line.replace('\xa0\xa0\xa0\xa0', '')  # 除去特殊字符
 
-        if not os.path.exists(path):
-            with open(path, 'x') as f:
-                for text in content:
-                    text.replace('\xa0\xa0\xa0\xa0', '')  # 除去特殊字符
-                    f.write(text + '\n')
+        item = ChapterItem()
+        for field in item.fields:
+            try:
+                item[field] = eval(field)
+            except NameError:
+                self.logger.debug('Field is not Defined' + field)
+        yield item
 
-        if next.endswith('.html'):
-            yield scrapy.Request(url=next, callback=self.parse_detail)
+        # 小说章节数据存进 data 文件夹
+        # self.logger.debug('章节名称: ' + title)
+        # dir = 'data/' + name + '/'
+        # path = dir + title + '.txt'
+        # if not os.path.exists(dir):
+        #     os.mkdir(dir)
+        #
+        # if not os.path.exists(path):
+        #     with open(path, 'x') as f:
+        #         for text in content:
+        #             text.replace('\xa0\xa0\xa0\xa0', '')  # 除去特殊字符
+        #             f.write(text + '\n')
+        #
+        # # 点击下一章
+        # next = 'https://www.biquge.com.cn' + response.css('.bottem1 a:nth-child(3)::attr(href)').extract_first()
+        # if next.endswith('.html'):
+        #     yield scrapy.Request(url=next, callback=self.parse_detail)
