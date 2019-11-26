@@ -6,6 +6,8 @@
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 import pymongo
 
+from novel.items import NovelItem, ChapterItem
+
 
 class NovelPipeline(object):
     def process_item(self, item, spider):
@@ -35,7 +37,18 @@ class MongoPipeline(object):
 
     def process_item(self, item, spider):
         name = item.__class__.__name__
-        self.db[name].insert(dict(item))
+        if isinstance(item, NovelItem):
+            if not self.db[name].find_one({'name': item['name'], 'author': item['author']}):
+                self.db[name].insert(dict(item))
+                print('NovelItem 保存成功')
+            else:
+                print('NovelItem 已保存')
+        if isinstance(item, ChapterItem):
+            if not self.db[name].find_one({'name': item['name'], 'author': item['title']}):
+                self.db[name].insert(dict(item))
+                print('ChapterItem 保存成功')
+            else:
+                print('ChapterItem 已保存')
         return item
 
     def close_spider(self, spider):
