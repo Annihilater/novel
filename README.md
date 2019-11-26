@@ -17,12 +17,14 @@
 
 ## 数据储存
 
-1. 小说简介数据存放在本机 MongoDB 中；
-2. 小说章节数据存放在项目根目录的 `data/db`中。
+1. 小说简介数据存放在本机 MongoDB ；
+2. 小说章节数据也存放在本机 MongoDB 。
 
-![image-20191122214846015](https://klause-blog-pictures.oss-cn-shanghai.aliyuncs.com/2019-11-22-134846.png)
+![image-20191126184735401](https://klause-blog-pictures.oss-cn-shanghai.aliyuncs.com/2019-11-26-104735.png)
 
-![image-20191122215009274](https://klause-blog-pictures.oss-cn-shanghai.aliyuncs.com/2019-11-22-135009.png)
+![image-20191126185734162](https://klause-blog-pictures.oss-cn-shanghai.aliyuncs.com/2019-11-26-105734.png)
+
+![image-20191126184437589](https://klause-blog-pictures.oss-cn-shanghai.aliyuncs.com/2019-11-26-104438.png)
 
 
 
