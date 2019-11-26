@@ -95,12 +95,16 @@ ITEM_PIPELINES = {
 MONGO_URI = '127.0.0.1'
 MONGO_DB = 'novel'
 
+# crawlab mongodb 配置
+# MONGO_URI = 'mongo'
+# MONGO_DB = 'crawlab_test'
+
 # log
-LOG_ENABLE = True
-LOG_ENCODING = 'UTF-8'
-LOG_FILE = 'log/biquge.log'
-LOG_LEVEL = 'DEBUG'
-LOG_STDOUT = False
+# LOG_ENABLE = True
+# LOG_ENCODING = 'UTF-8'
+# LOG_FILE = 'log/biquge.log'
+# LOG_LEVEL = 'DEBUG'
+# LOG_STDOUT = False
 
 # 禁止重试
 RETRY_ENABLED = False
