@@ -21,6 +21,6 @@ class NovelItem(scrapy.Item):
 
 
 class ChapterItem(scrapy.Item):
-    chapter_num = Field()
+    name = Field()
     title = Field()
     content = Field()
